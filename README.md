@@ -4,3 +4,4 @@
 ## Feature
 - .NET Core 2.2
 - Azure Table Storage
+- Storage Emulator

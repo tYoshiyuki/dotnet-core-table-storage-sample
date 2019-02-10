@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace DotNetCoreTableStorageSample.Services
 {
+    /// <summary>
+    /// Azure Table Storageのサービスインターフェースです
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ITableStorageService<T> where T : TableEntity, new()
     {
         Task<List<T>> GetList();
@@ -16,6 +20,10 @@ namespace DotNetCoreTableStorageSample.Services
         Task Delete(string partitionKey, string rowKey);
     }
 
+    /// <summary>
+    /// Azure Table Storgaeのサービスクラスです
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TableStorageService<T> : ITableStorageService<T> where T : TableEntity, new()
     {
         public TableStorageService(string connectionString)
@@ -23,6 +31,10 @@ namespace DotNetCoreTableStorageSample.Services
             this.connectionString = connectionString;
         }
 
+        /// <summary>
+        /// エンティティのリストを取得します
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<T>> GetList()
         {
             var table = await GetTableAsync();
@@ -41,6 +53,11 @@ namespace DotNetCoreTableStorageSample.Services
             return results;
         }
 
+        /// <summary>
+        /// エンティティのリストを取得します
+        /// </summary>
+        /// <param name="query">取得条件となるTableQuery</param>
+        /// <returns></returns>
         public async Task<List<T>> GetList(TableQuery<T> query)
         {
             var table = await GetTableAsync();
@@ -59,6 +76,11 @@ namespace DotNetCoreTableStorageSample.Services
         }
 
 
+        /// <summary>
+        /// エンティティのリストを取得します
+        /// </summary>
+        /// <param name="partitionKey">取得条件となるPartitionKey</param>
+        /// <returns></returns>
         public async Task<List<T>> GetList(string partitionKey)
         {
             var table = await GetTableAsync();
@@ -77,6 +99,12 @@ namespace DotNetCoreTableStorageSample.Services
             return results;
         }
 
+        /// <summary>
+        /// エンティティを取得します
+        /// </summary>
+        /// <param name="partitionKey">取得条件となるPartitionKey</param>
+        /// <param name="rowKey">取得条件となるRowKey</param>
+        /// <returns></returns>
         public async Task<T> GetItem(string partitionKey, string rowKey)
         {
             var table = await GetTableAsync();
@@ -85,6 +113,11 @@ namespace DotNetCoreTableStorageSample.Services
             return (T)(dynamic)result.Result;
         }
 
+        /// <summary>
+        /// エンティティを登録します
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public async Task Insert(T item)
         {
             var table = await GetTableAsync();
@@ -92,6 +125,11 @@ namespace DotNetCoreTableStorageSample.Services
             await table.ExecuteAsync(operation);
         }
 
+        /// <summary>
+        /// エンティティを更新します
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public async Task Update(T item)
         {
             var table = await GetTableAsync();
@@ -99,6 +137,12 @@ namespace DotNetCoreTableStorageSample.Services
             await table.ExecuteAsync(operation);
         }
 
+        /// <summary>
+        /// エンティティを削除します
+        /// </summary>
+        /// <param name="partitionKey"></param>
+        /// <param name="rowKey"></param>
+        /// <returns></returns>
         public async Task Delete(string partitionKey, string rowKey)
         {
             T item = await GetItem(partitionKey, rowKey);
@@ -107,8 +151,15 @@ namespace DotNetCoreTableStorageSample.Services
             await table.ExecuteAsync(operation);
         }
 
+        /// <summary>
+        /// ConnectionStringです
+        /// </summary>
         private readonly string connectionString;
 
+        /// <summary>
+        /// CloudTableを取得します
+        /// </summary>
+        /// <returns></returns>
         private async Task<CloudTable> GetTableAsync()
         {
             var storageAccount = CloudStorageAccount.Parse(connectionString);

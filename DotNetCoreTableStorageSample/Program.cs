@@ -27,12 +27,16 @@ namespace DotNetCoreTableStorageSample
 
             // サンプル実装
             var blogs = await service.GetList();
+
+            // Delete
             blogs.ForEach(async _ => await service.Delete(_.PartitionKey, _.RowKey));
 
+            // Insert
             await service.Insert(new Blog { BlogId = 1, Author = "Tanaka", Name = "Taro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "1", Timestamp = DateTime.Now });
             await service.Insert(new Blog { BlogId = 2, Author = "Suzuki", Name = "Jiro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "2", Timestamp = DateTime.Now });
             await service.Insert(new Blog { BlogId = 3, Author = "Sato", Name = "Saburo", RowKey = Guid.NewGuid().ToString(), PartitionKey = "3", Timestamp = DateTime.Now });
 
+            // Select
             var query = new TableQuery<Blog>().Where(TableQuery.GenerateFilterCondition("Author", QueryComparisons.Equal, "Tanaka"));
             var blog = await service.GetList(query);
 

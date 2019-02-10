@@ -3,6 +3,7 @@ using DotNetCoreTableStorageSample.Entities;
 using DotNetCoreTableStorageSample.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using RimDev.Automation.StorageEmulator;
 using System;
@@ -30,9 +31,6 @@ namespace DotNetCoreTableStorageSample.Test.Services
 
             if (!AzureStorageEmulatorAutomation.IsEmulatorRunning()) throw new Exception("Azure Storage Emulatorの起動に失敗しました");
 
-            // テーブルの初期化
-            _emulator.ClearTables();
-
             // 設定ファイルの読み込み
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -41,7 +39,8 @@ namespace DotNetCoreTableStorageSample.Test.Services
 
             // サービスの構成
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton<ITableStorageService<Blog>>(factory => new TableStorageService<Blog>(configuration["ConnectionStrings:StorageConnection"]));
+            var connectionStrings = configuration["ConnectionStrings:StorageConnection"];
+            serviceCollection.AddSingleton<ITableStorageService<Blog>>(factory => new TableStorageService<Blog>(connectionStrings));
             _service = serviceCollection.BuildServiceProvider().GetService<ITableStorageService<Blog>>();
         }
 
@@ -57,6 +56,7 @@ namespace DotNetCoreTableStorageSample.Test.Services
         public async Task GetList_取得件数が想定通り()
         {
             // Arrange
+            await _service.DeleteTable();
             await _service.Insert(new Blog { BlogId = 1, Author = "Tanaka", Name = "Taro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "1", Timestamp = DateTime.Now });
             await _service.Insert(new Blog { BlogId = 2, Author = "Suzuki", Name = "Jiro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "2", Timestamp = DateTime.Now });
             await _service.Insert(new Blog { BlogId = 3, Author = "Sato", Name = "Saburo", RowKey = Guid.NewGuid().ToString(), PartitionKey = "3", Timestamp = DateTime.Now });
@@ -72,6 +72,7 @@ namespace DotNetCoreTableStorageSample.Test.Services
         public async Task GetList_TableQueryを指定して取得()
         {
             // Arrange
+            await _service.DeleteTable();
             await _service.Insert(new Blog { BlogId = 1, Author = "Tanaka", Name = "Taro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "1", Timestamp = DateTime.Now });
             await _service.Insert(new Blog { BlogId = 2, Author = "Suzuki", Name = "Jiro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "2", Timestamp = DateTime.Now });
             await _service.Insert(new Blog { BlogId = 3, Author = "Sato", Name = "Saburo", RowKey = Guid.NewGuid().ToString(), PartitionKey = "3", Timestamp = DateTime.Now });
@@ -89,6 +90,7 @@ namespace DotNetCoreTableStorageSample.Test.Services
         public async Task GetItem_正常取得()
         {
             // Arrange
+            await _service.DeleteTable();
             var guid = Guid.NewGuid().ToString();
             await _service.Insert(new Blog { BlogId = 1, Author = "Tanaka", Name = "Taro", RowKey = Guid.NewGuid().ToString(), PartitionKey = "1", Timestamp = DateTime.Now });
             await _service.Insert(new Blog { BlogId = 2, Author = "Suzuki", Name = "Jiro", RowKey = guid, PartitionKey = "2", Timestamp = DateTime.Now });
@@ -106,6 +108,7 @@ namespace DotNetCoreTableStorageSample.Test.Services
         public async Task Update_正常更新()
         {
             // Arrange
+            await _service.DeleteTable();
             var guid = Guid.NewGuid().ToString();
             await _service.Insert(new Blog { BlogId = 1, Author = "Tanaka", Name = "Taro", RowKey = guid, PartitionKey = "1", Timestamp = DateTime.Now });
 
@@ -124,6 +127,7 @@ namespace DotNetCoreTableStorageSample.Test.Services
         public async Task Delete_正常削除()
         {
             // Arrange
+            await _service.DeleteTable();
             var guid = Guid.NewGuid().ToString();
             await _service.Insert(new Blog { BlogId = 1, Author = "Tanaka", Name = "Taro", RowKey = guid, PartitionKey = "1", Timestamp = DateTime.Now });
 

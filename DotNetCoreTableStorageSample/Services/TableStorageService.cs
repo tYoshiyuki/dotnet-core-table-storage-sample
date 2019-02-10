@@ -18,6 +18,7 @@ namespace DotNetCoreTableStorageSample.Services
         Task Insert(T item);
         Task Update(T item);
         Task Delete(string partitionKey, string rowKey);
+        Task DeleteTable();
     }
 
     /// <summary>
@@ -149,6 +150,18 @@ namespace DotNetCoreTableStorageSample.Services
             var table = await GetTableAsync();
             var operation = TableOperation.Delete(item);
             await table.ExecuteAsync(operation);
+        }
+
+        /// <summary>
+        /// テーブルを削除します
+        /// </summary>
+        /// <returns></returns>
+        public async Task DeleteTable()
+        {
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var tableClient = storageAccount.CreateCloudTableClient();
+            var table = tableClient.GetTableReference(typeof(T).Name);
+            await table.DeleteIfExistsAsync();
         }
 
         /// <summary>

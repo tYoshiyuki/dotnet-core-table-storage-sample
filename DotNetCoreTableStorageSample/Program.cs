@@ -22,7 +22,7 @@ namespace DotNetCoreTableStorageSample
 
             // サービスの設定
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton<ITableStorageService<Blog>>(factory => new TableStorageService<Blog>(configuration["ConnectionStrings:StorageConnection"]));
+            serviceCollection.AddSingleton<ITableStorageService<Blog>>(provider => new TableStorageService<Blog>(configuration["ConnectionStrings:StorageConnection"]));
             var service = serviceCollection.BuildServiceProvider().GetService<ITableStorageService<Blog>>();
 
             // サンプル実装

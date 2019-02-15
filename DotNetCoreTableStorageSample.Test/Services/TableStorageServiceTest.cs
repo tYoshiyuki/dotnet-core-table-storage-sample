@@ -139,5 +139,19 @@ namespace DotNetCoreTableStorageSample.Test.Services
             var blogs = await _service.GetList();
             blogs.Count().Is(0);
         }
+
+        [Fact]
+        public async Task IsExist_正常取得()
+        {
+            // Arrange
+            await _service.GetList();
+
+            // Act
+            var result = await _service.IsExist();
+
+            // Assert
+            result.Is(true);
+        }
+
     }
 }

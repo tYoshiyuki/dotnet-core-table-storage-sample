@@ -18,6 +18,7 @@ namespace DotNetCoreTableStorageSample.Services
         Task Insert(T item);
         Task Update(T item);
         Task Delete(string partitionKey, string rowKey);
+        Task<bool> IsExist();
         Task DeleteTable();
     }
 
@@ -162,6 +163,18 @@ namespace DotNetCoreTableStorageSample.Services
             var tableClient = storageAccount.CreateCloudTableClient();
             var table = tableClient.GetTableReference(typeof(T).Name);
             await table.DeleteIfExistsAsync();
+        }
+
+        /// <summary>
+        /// テーブルの存在をチェックします
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> IsExist()
+        {
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var tableClient = storageAccount.CreateCloudTableClient();
+            var table = tableClient.GetTableReference(typeof(T).Name);
+            return await table.ExistsAsync();
         }
 
         /// <summary>

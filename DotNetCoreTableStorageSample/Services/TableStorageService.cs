@@ -11,6 +11,8 @@ namespace DotNetCoreTableStorageSample.Services
     /// <typeparam name="T"></typeparam>
     public interface ITableStorageService<T> where T : TableEntity, new()
     {
+        string ConnectionString { get; set; }
+        string TableName { get; set; }
         Task<List<T>> GetList();
         Task<List<T>> GetList(TableQuery<T> query);
         Task<List<T>> GetList(string partitionKey);
@@ -30,8 +32,19 @@ namespace DotNetCoreTableStorageSample.Services
     {
         public TableStorageService(string connectionString)
         {
-            this.connectionString = connectionString;
+            ConnectionString = connectionString;
+            TableName = typeof(T).Name;
         }
+
+        /// <summary>
+        /// ConnectionStringです
+        /// </summary>
+        public string ConnectionString { get; set; }
+
+        /// <summary>
+        /// TableNameです
+        /// </summary>
+        public string TableName { get; set; }
 
         /// <summary>
         /// エンティティのリストを取得します
@@ -159,9 +172,9 @@ namespace DotNetCoreTableStorageSample.Services
         /// <returns></returns>
         public async Task DeleteTable()
         {
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(typeof(T).Name);
+            var table = tableClient.GetTableReference(TableName);
             await table.DeleteIfExistsAsync();
         }
 
@@ -171,26 +184,22 @@ namespace DotNetCoreTableStorageSample.Services
         /// <returns></returns>
         public async Task<bool> IsExist()
         {
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(typeof(T).Name);
+            var table = tableClient.GetTableReference(TableName);
             return await table.ExistsAsync();
         }
 
         /// <summary>
-        /// ConnectionStringです
-        /// </summary>
-        private readonly string connectionString;
-
-        /// <summary>
         /// CloudTableを取得します
+        /// 対象のテーブルが存在しない場合は、テーブルを作成します
         /// </summary>
         /// <returns></returns>
         private async Task<CloudTable> GetTableAsync()
         {
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(typeof(T).Name);
+            var table = tableClient.GetTableReference(TableName);
             await table.CreateIfNotExistsAsync();
             return table;
         }

@@ -40,7 +40,7 @@ namespace DotNetCoreTableStorageSample
             var query = new TableQuery<Blog>().Where(TableQuery.GenerateFilterCondition("Author", QueryComparisons.Equal, "Tanaka"));
             var blog = await service.GetList(query);
 
-            Console.WriteLine($"Hello {blog.FirstOrDefault().Author}!");
+            Console.WriteLine($"Hello {blog.First().Author}!");
         }
     }
 }
